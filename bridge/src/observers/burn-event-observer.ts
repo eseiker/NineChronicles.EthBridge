@@ -1,6 +1,6 @@
 import { IObserver } from ".";
 import { BlockHash } from "../types/block-hash";
-import { EventData } from "web3-eth-contract";
+import type { CorvetteEventResponse } from "../monitors/corvette-monitor";
 import { TransactionLocation } from "../types/transaction-location";
 import { BurnEventResult } from "../types/burn-event-result";
 import { INCGTransfer } from "../interfaces/ncg-transfer";
@@ -18,7 +18,7 @@ export class EthereumBurnEventObserver
     implements
         IObserver<{
             blockHash: BlockHash;
-            events: (EventData & TransactionLocation)[];
+            events: (CorvetteEventResponse & TransactionLocation)[];
         }>
 {
     private readonly _ncgTransfer: INCGTransfer;
@@ -58,7 +58,7 @@ export class EthereumBurnEventObserver
 
     async notify(data: {
         blockHash: BlockHash;
-        events: (EventData & TransactionLocation)[];
+        events: (CorvetteEventResponse & TransactionLocation)[];
     }): Promise<void> {
         const { blockHash, events } = data;
         if (events.length === 0) {
@@ -68,12 +68,12 @@ export class EthereumBurnEventObserver
             });
         }
 
-        for (const { returnValues, transactionHash, blockHash } of events) {
+        for (const { args, transactionHash, blockHash } of events) {
             const {
                 _sender: sender,
                 _to,
                 amount: burnedWrappedNcgAmountString,
-            } = returnValues as BurnEventResult;
+            } = args.named as unknown as BurnEventResult;
             const recipient = _to.substring(0, 42);
             const amount = new Decimal(burnedWrappedNcgAmountString).div(
                 new Decimal(10).pow(18)
