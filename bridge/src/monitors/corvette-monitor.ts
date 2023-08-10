@@ -6,6 +6,7 @@ import type { TransactionLocation } from "../types/transaction-location";
 
 const CORVETTE_EVENT_API_URL = "http://localhost:8000/";
 const CORVETTE_LISTEN_PORT = 4000;
+const BURN_ABI_SIGNATURE = "Burn(address,bytes32,uint256)";
 
 function delay(ms: number): Promise<void> {
     return new Promise((resolve) => {
@@ -52,6 +53,7 @@ export class CorvetteEventMonitor extends Monitor<CorvetteEventResponse> {
             const { data } = await axios
                 .post<CorvetteEventResponse[]>(CORVETTE_EVENT_API_URL, {
                     blockFrom: this.latestTransactionLocation.blockHash,
+                    abiSignature: BURN_ABI_SIGNATURE,
                 })
                 .catch((err) => {
                     console.error(err);
@@ -100,7 +102,8 @@ export class CorvetteEventMonitor extends Monitor<CorvetteEventResponse> {
 
             if (
                 this.contractDescription.address.toLowerCase() ===
-                eventData.sourceAddress.toLowerCase()
+                    eventData.sourceAddress.toLowerCase() &&
+                eventData.abiSignature === BURN_ABI_SIGNATURE
             ) {
                 this.eventDataQueue.add(eventData);
             }
