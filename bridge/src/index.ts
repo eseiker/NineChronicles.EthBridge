@@ -3,7 +3,7 @@ import { init } from "@sentry/node";
 import { KmsProvider } from "@planetarium/aws-kms-provider";
 
 import { IWrappedNCGMinter } from "./interfaces/wrapped-ncg-minter";
-import { EthereumBurnEventMonitor } from "./monitors/ethereum-burn-event-monitor";
+import { CorvetteEventMonitor } from "./monitors/corvette-monitor";
 import { NineChroniclesTransferredEventMonitor } from "./monitors/nine-chronicles-transferred-event-monitor";
 import { WrappedNCGMinter } from "./wrapped-ncg-minter";
 import { wNCGTokenAbi } from "./wrapped-ncg-token";
@@ -366,11 +366,9 @@ process.on("uncaughtException", console.error);
         ETHERSCAN_ROOT_URL,
         integration
     );
-    const ethereumBurnEventMonitor = new EthereumBurnEventMonitor(
-        web3,
+    const ethereumBurnEventMonitor = new CorvetteEventMonitor(
         wNCGToken,
-        await monitorStateStore.load("ethereum"),
-        CONFIRMATIONS
+        await monitorStateStore.load("ethereum")
     );
     ethereumBurnEventMonitor.attach(ethereumBurnEventObserver);
 
